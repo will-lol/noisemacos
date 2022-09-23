@@ -3,7 +3,8 @@
     "beforeBuildCommand": "",
     "beforeDevCommand": "",
     "devPath": "../ui",
-    "distDir": "../ui"
+    "distDir": "../ui",
+    "withGlobalTauri": true
   },
   "package": {
     "productName": "noise",
@@ -11,7 +12,12 @@
   },
   "tauri": {
     "allowlist": {
-      "all": false
+        "fs": {
+          "writeFile": true
+        },
+        "dialog": {
+          "save": true 
+        }
     },
     "bundle": {
       "active": true,
@@ -56,7 +62,7 @@
       {
         "fullscreen": false,
         "height": 512,
-        "resizable": false,
+        "resizable": true,
         "title": "noise",
         "width": 512
       }

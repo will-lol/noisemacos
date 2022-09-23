@@ -1,1 +1,422 @@
-<!DOCTYPE html><html lang="en"> <head> <meta charset="UTF-8"/> <meta http-equiv="X-UA-Compatible" content="IE=edge"/> <meta name="viewport" content="width=device-width, initial-scale=1.0"/> <title>Noise</title> </head> <body> <style>@font-face{font-family: "Redaction"; font-style: italic; src: url(Redaction_35-Italic.woff2);}</style> <style>body{background-image: url(noise.webp); margin: 0; font-family: "Redaction"; color: black; width: 100vw; height: 100vh; overflow: none ;}.wrap{display: flex; height: 100%; flex-direction: column; background: linear-gradient( 0deg, rgba(253, 253, 253, 0.8) 0%, rgba(253, 253, 253, 1) 100% ); padding: 1.5rem;}.wrap label{padding-bottom: 0.5rem; padding-top: 0.2rem;}@media (prefers-color-scheme: dark){body{color: white;}.wrap{background: linear-gradient( 0deg, rgba(36, 36, 36, 0.6) 0%, rgba(36, 36, 36, 1) 100% );}}</style> <style>.eqWrap{background-color: transparent; display: flex; justify-content: space-between;}.eqWrap input{-webkit-appearance: slider-vertical; width: 10px;}.eqSliderWrap{display: flex; flex-direction: column; align-items: center;}.eqSliderWrap label{padding-top: 0.5rem; font-size: 0.8rem;}.eqSliderWrap input{-webkit-appearance: slider-vertical; width: 10px;}</style> <div class="wrap"> <label for="gain">gain</label> <input name="gain" id="gain" type="range" min="0" max="100" value="30" step="1"/> <label>eq</label> <div class="eqWrap" id="eq"></div></div><script>const frequencyBandValues=[20, 30, 60, 200, 500, 1000, 2000, 4000, 9000, 15000]; var frequencyBands=new Array(7); const audioCtx=new (window.AudioContext || window.webkitAudioContext)(); const secondsOfAudio=5; const gainNode=audioCtx.createGain(); const eqDiv=document.getElementById("eq"); const eqLabels=document.getElementById("labels"); for (i=0; i < frequencyBandValues.length - 1; i++){frequencyBands[i]=new BiquadFilterNode(audioCtx,{type: "peaking", Q: 50, frequency: (frequencyBandValues[i + 1] - frequencyBandValues[i]) / 2 + frequencyBandValues[i], gain: 0,}); let currentWrap=document.createElement("div"); currentWrap.classList.add("eqSliderWrap"); let currentEq=document.createElement("input"); currentEq.setAttribute("name", "eqGain" + i); currentEq.setAttribute("id", "eqGain" + i); currentEq.setAttribute("type", "range"); currentEq.setAttribute("min", "-200"); currentEq.setAttribute("max", "200"); currentEq.setAttribute("value", "0"); currentEq.setAttribute("step", "1"); currentWrap.appendChild(currentEq); let currentLabel=document.createElement("label"); currentLabel.setAttribute("for", "eqGain" + i); let currentLabelText=document.createTextNode( (frequencyBandValues[i + 1] - frequencyBandValues[i]) / 2 + frequencyBandValues[i] + "hz" ); currentLabel.appendChild(currentLabelText); currentWrap.appendChild(currentLabel); eqDiv.appendChild(currentWrap);}const myArrayBuffer=audioCtx.createBuffer( 2, audioCtx.sampleRate * secondsOfAudio, audioCtx.sampleRate ); for ( let channel=0; channel < myArrayBuffer.numberOfChannels; channel++ ){const nowBuffering=myArrayBuffer.getChannelData(channel); for (let i=0; i < myArrayBuffer.length; i++){nowBuffering[i]=Math.random() * 2 - 1;}}</script> <script>gainNode.gain.setValueAtTime(0.00001, audioCtx.currentTime); const source=audioCtx.createBufferSource(); source.loop=true; source.buffer=myArrayBuffer; source.connect(frequencyBands[0]); for (i=0; i < frequencyBands.length - 1; i++){frequencyBands[i].connect(frequencyBands[i + 1]);}frequencyBands[frequencyBands.length - 2].connect(gainNode); gainNode.connect(audioCtx.destination); function start(){source.start(); gainNode.gain.setValueAtTime(0.00000001, audioCtx.currentTime); gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 3);}start(); </script> <script>document.querySelectorAll(".eqSliderWrap input").forEach((item)=>{item.addEventListener("input", (event)=>{id=parseInt(event.srcElement.id.match(/(\d+)/)[0]); frequencyBands[id].gain.setValueAtTime( parseInt(event.target.value, 10), audioCtx.currentTime );});}); </script> <script>const gainElement=document.getElementById("gain"); gainElement.addEventListener( "input", (event)=>{gainNode.gain.setValueAtTime( parseInt(event.target.value, 10) / 100, audioCtx.currentTime );}, false ); </script> </body></html>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Noise</title>
+  </head>
+  <body>
+    <style>
+      @font-face {
+        font-family: "Redaction";
+        font-style: italic;
+        src: url(Redaction_35-Italic.woff2);
+      }
+    </style>
+    <style>
+      body {
+        background-image: url(noise.webp);
+        margin: 0;
+        font-family: "Redaction";
+        color: black;
+        width: 100vw;
+        height: 100vh;
+        overflow: none;
+      }
+      .wrap {
+        display: flex;
+        height: 100%;
+        flex-direction: column;
+        background: linear-gradient(
+          0deg,
+          rgba(253, 253, 253, 0.8) 0%,
+          rgba(253, 253, 253, 1) 100%
+        );
+        padding: 1.5rem;
+      }
+      .wrap label {
+        padding-bottom: 0.5rem;
+        padding-top: 0.2rem;
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          color: white;
+        }
+        .wrap {
+          background: linear-gradient(
+            0deg,
+            rgba(36, 36, 36, 0.6) 0%,
+            rgba(36, 36, 36, 1) 100%
+          );
+        }
+      }
+    </style>
+    <style>
+      .eqWrap {
+        background-color: transparent;
+        display: flex;
+        justify-content: space-between;
+      }
+      .eqWrap input {
+        -webkit-appearance: slider-vertical;
+        width: 10px;
+      }
+      .eqSliderWrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .eqSliderWrap label {
+        padding-top: 0.5rem;
+        font-size: 0.8rem;
+      }
+      .eqSliderWrap input {
+        -webkit-appearance: slider-vertical;
+        width: 10px;
+      }
+    </style>
+    <div class="wrap">
+      <label for="gain">gain</label>
+      <input
+        name="gain"
+        id="gain"
+        type="range"
+        min="0"
+        max="100"
+        value="30"
+        step="1"
+      />
+
+      <label>eq</label>
+      <div class="eqWrap" id="eq"></div>
+      <div>
+        <button id="recorderButton">Start recording to file</button>
+        <button onclick="savePreset()">Save default preset</button>
+      </div>
+    </div>
+    <style>
+      canvas {
+        width: 100%;
+        height: 40px;
+      }
+    </style>
+    <style>
+      .messageWrap {
+        position: fixed;
+        z-index: 100;
+        bottom: 1rem;
+        right: 1rem;
+        padding: 0.2rem 0.3rem;
+        background-color: rgba(0, 0, 0, 60%);
+        color: white;
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: space-between;
+        align-items: center;
+        transition: opacity 1000ms linear;
+        opacity: 1;
+      }
+
+      .messageDot {
+        width: 0.6rem;
+        height: 0.6rem;
+        border-radius: 10rem;
+        margin-right: 0.2rem;
+      }
+
+      .positive {
+        background-color: rgb(0, 232, 0);
+      }
+
+      .negative {
+        background-color: rgb(232, 0, 0);
+      }
+    </style>
+    <script>
+      //This script tag defines a function that will display a message on the screen
+      var heightOffset;
+
+      function displayMessage(message, positive, elem) {
+        let messageElem = document.createElement("div");
+        let messageDot = document.createElement("dot");
+        messageElem.classList.add("messageWrap");
+        messageDot.classList.add("messageDot");
+
+        if (positive) {
+          messageDot.classList.add("positive");
+        } else {
+          messageDot.classList.add("negative");
+        }
+
+        messageElem.innerText = message;
+
+        if (elem != undefined) {
+          messageElem.appendChild(elem);
+        }
+
+        messageElem.style.transform = "translateX(" + heightOffset + ")";
+
+        messageElem.appendChild(messageDot);
+        document.body.appendChild(messageElem);
+
+        heightOffset += messageElem.offsetHeight;
+
+        setTimeout(function () {
+          messageElem.style.opacity = "0";
+          setTimeout(function () {
+            heightOffset -= messageElem.offsetHeight;
+            messageElem.remove();
+          }, 1000);
+        }, 3000);
+      }
+    </script>
+    <script>
+      //This script tag is to set up all of the audio things we need and to generate the noise.
+
+      //Instantiate variables we need
+      const frequencyBandValues = [
+        20, 30, 60, 200, 500, 1000, 2000, 4000, 9000, 15000,
+      ]; //This seemingly random assortment of numbers is the series of numbers that represents our EQ bands.
+      var frequencyBands = new Array(7); //Instantiate an array for our biquad filters
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const secondsOfAudio = 100; //The seconds of noise generated. We will just loop these seconds of noise. Change this if the repetition is obvious to you.
+      const gainNode = audioCtx.createGain(); //Create the final gain node
+
+      //This section of code will generate all the elements we need and create their associated biquad filters
+      const eqDiv = document.getElementById("eq");
+      const eqLabels = document.getElementById("labels");
+      for (i = 0; i < frequencyBandValues.length - 1; i++) {
+        //Create a biquad filter
+        frequencyBands[i] = new BiquadFilterNode(audioCtx, {
+          type: "peaking",
+          Q: 50,
+          frequency:
+            (frequencyBandValues[i + 1] - frequencyBandValues[i]) / 2 +
+            frequencyBandValues[i],
+          gain: 0,
+        });
+
+        //Create a new wrapper element for our slider
+        let currentWrap = document.createElement("div");
+        currentWrap.classList.add("eqSliderWrap");
+
+        //Add the slider to the wrapper with a bunch of attributes
+        let currentEq = document.createElement("input");
+        currentEq.setAttribute("name", "eqGain" + i);
+        currentEq.setAttribute("id", "eqGain" + i);
+        currentEq.setAttribute("type", "range");
+        currentEq.setAttribute("min", "-200");
+        currentEq.setAttribute("max", "200");
+        currentEq.setAttribute("value", "0");
+        currentEq.setAttribute("step", "1");
+        currentWrap.appendChild(currentEq);
+
+        //Generate the labels and add them to the wrapper
+        let currentLabel = document.createElement("label");
+        currentLabel.setAttribute("for", "eqGain" + i);
+        let currentLabelText = document.createTextNode(
+          (frequencyBandValues[i + 1] - frequencyBandValues[i]) / 2 +
+            frequencyBandValues[i] +
+            "hz"
+        );
+
+        //Add the current slider to the DOM
+        currentLabel.appendChild(currentLabelText);
+        currentWrap.appendChild(currentLabel);
+        eqDiv.appendChild(currentWrap);
+      }
+
+      //Instantiate audio buffer
+      const myArrayBuffer = audioCtx.createBuffer(
+        2,
+        audioCtx.sampleRate * secondsOfAudio,
+        audioCtx.sampleRate
+      );
+
+      //These loops generate our pure white noise.
+      for (
+        let channel = 0;
+        channel < myArrayBuffer.numberOfChannels;
+        channel++
+      ) {
+        //This gives us the actual array that contains the data
+        const nowBuffering = myArrayBuffer.getChannelData(channel);
+        for (let i = 0; i < myArrayBuffer.length; i++) {
+          nowBuffering[i] = Math.random() * 2 - 1;
+        }
+      }
+    </script>
+    <script>
+      //This script tag is to connect all of our nodes and ramp up volume.
+
+      //Setup variables and default values
+      gainNode.gain.setValueAtTime(0.00001, audioCtx.currentTime);
+      const source = audioCtx.createBufferSource();
+      source.loop = true;
+      source.buffer = myArrayBuffer;
+
+      //Connect everything up
+      source.connect(frequencyBands[0]);
+      for (i = 0; i < frequencyBands.length - 1; i++) {
+        frequencyBands[i].connect(frequencyBands[i + 1]);
+      }
+      frequencyBands[frequencyBands.length - 2].connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      //I made this a function in case of debugging in an actual browser and it prevents audio playing without user interaction. Add an onclick to a button with this function to overcome this.
+      function start() {
+        source.start();
+        gainNode.gain.setValueAtTime(0.00000001, audioCtx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 3);
+      }
+      //Unleash...
+      start();
+    </script>
+    <script>
+      //This script tag is to add event listeners to all our EQ sliders.
+
+      //Get all slider elements
+      document.querySelectorAll(".eqSliderWrap input").forEach((item) => {
+        item.addEventListener("input", (event) => {
+          //Extract the number from the element id
+          id = parseInt(event.srcElement.id.match(/(\d+)/)[0]);
+          //Set the gain
+          frequencyBands[id].gain.linearRampToValueAtTime(
+            parseInt(event.target.value, 10),
+            audioCtx.currentTime + 0.05
+          );
+        });
+      });
+    </script>
+    <script>
+      //This script tag is to add event listener to gain slider.
+
+      const gainElement = document.getElementById("gain");
+      gainElement.addEventListener(
+        "input",
+        (event) => {
+          //Set the gain
+          gainNode.gain.linearRampToValueAtTime(
+            parseInt(event.target.value, 10) / 100,
+            audioCtx.currentTime + 0.05
+          );
+        },
+        false
+      );
+    </script>
+    <script>
+      //Presets
+      class Preset {
+        frequencyBandGains;
+        frequencyBandSliders;
+
+        constructor(frequencyBands, DOMSlidersList) {
+          if (frequencyBands != undefined) {
+            this.frequencyBandGains = Array(frequencyBands.length);
+            for (i = 0; i < frequencyBands.length; i++) {
+              this.frequencyBandGains[i] = frequencyBands[i].gain.value;
+            }
+          }
+          if (DOMSlidersList != undefined) {
+            this.frequencyBandSliders = Array.from(DOMSlidersList).map(
+              (elem) => elem.id
+            );
+          }
+        }
+
+        createFromData(data) {
+          Object.assign(this, data);
+        }
+
+        apply(frequencyBands, context) {
+          for (i = 0; i < this.frequencyBandGains.length; i++) {
+            frequencyBands[i].gain.linearRampToValueAtTime(
+              this.frequencyBandGains[i],
+              context.currentTime + 0.2
+            );
+
+            document.getElementById(this.frequencyBandSliders[i]).value =
+              this.frequencyBandGains[i];
+          }
+        }
+      }
+
+      const sliders = document.querySelectorAll(".eqSliderWrap input");
+      var defaultPreset = new Preset(frequencyBands, sliders);
+
+      function savePreset() {
+        userPreset = new Preset(frequencyBands, sliders);
+        window.localStorage.setItem("preset", JSON.stringify(userPreset));
+        displayMessage("Saved default preset!", true);
+      }
+
+      var userPreset;
+      function loadPreset() {
+        userPreset = new Preset();
+        userPreset.createFromData(
+          JSON.parse(window.localStorage.getItem("preset"))
+        );
+        userPreset.apply(frequencyBands, audioCtx);
+        displayMessage("Default preset loaded!", true);
+      }
+
+      loadPreset();
+    </script>
+    <script>
+      //This script tag is for the recorder
+      const dest = audioCtx.createMediaStreamDestination();
+      gainNode.connect(dest);
+      const mediaRecorder = new MediaRecorder(dest.stream);
+      const button = document.getElementById("recorderButton");
+      let chunks = [];
+      let finalBlob;
+      let clicked = false;
+
+      button.addEventListener("click", (e) => {
+        if (!clicked) {
+          mediaRecorder.start();
+          e.target.textContent = "Stop recording";
+          clicked = true;
+          displayMessage("Started recording", true);
+        } else {
+          mediaRecorder.stop();
+          e.target.textContent = "Start recording";
+          clicked = false;
+        }
+      });
+
+      mediaRecorder.ondataavailable = (evt) => {
+        console.log("data avaliable!");
+        chunks.push(evt.data);
+      };
+
+      mediaRecorder.onstop = (evt) => {
+        console.log(chunks);
+        finalBlob = new Blob(chunks, { type: "audio/ogg" });
+        chunks = [];
+        const blobURL = window.URL.createObjectURL(finalBlob);
+
+        var link = document.createElement("a");
+        link.href = blobURL;
+        link.download = "noise.ogg";
+        link.innerHTML = " download";
+        console.log(blobURL);
+
+        exportFile(finalBlob);
+      };
+
+      const { writeBinaryFile } = window.__TAURI__.fs;
+      const { save } = window.__TAURI__.dialog;
+
+      async function exportFile(finalBlob) {
+        binary = await finalBlob.arrayBuffer();
+        filePath = await save({multiple: false, filters: [{name: 'Audio', extensions: ['ogg']}]});
+
+        await writeBinaryFile(
+          { path: filePath, contents: binary }
+        );
+      }
+    </script>
+  </body>
+</html>
