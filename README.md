@@ -19,3 +19,4 @@ If you don't use MacOS, then the app is entirely un-tested. I may distribute an 
 5. The path to binaries is printed to the console :)
 ## please enjoy the app. 
 Available to download currently for MacOS only, however the tauri CLI is stupid easy to use so compiling for your platform should be no issue. 
+Please visit the [releases](https://github.com/will-lol/noise/releases) section.
