@@ -261,7 +261,7 @@
       for (i = 0; i < frequencyBands.length - 1; i++) {
         frequencyBands[i].connect(frequencyBands[i + 1]);
       }
-      frequencyBands[frequencyBands.length - 2].connect(gainNode);
+      frequencyBands[frequencyBands.length - 1].connect(gainNode);
       gainNode.connect(audioCtx.destination);
 
       //I made this a function in case of debugging in an actual browser and it prevents audio playing without user interaction. Add an onclick to a button with this function to overcome this.
@@ -281,6 +281,8 @@
         item.addEventListener("input", (event) => {
           //Extract the number from the element id
           id = parseInt(event.srcElement.id.match(/(\d+)/)[0]);
+
+          console.log("Slider " + id + " tuned to: " + event.target.value)
           //Set the gain
           frequencyBands[id].gain.linearRampToValueAtTime(
             parseInt(event.target.value, 10),

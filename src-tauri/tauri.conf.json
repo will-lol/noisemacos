@@ -62,7 +62,7 @@
       {
         "fullscreen": false,
         "height": 512,
-        "resizable": true,
+        "resizable": false,
         "title": "noise",
         "width": 512
       }
