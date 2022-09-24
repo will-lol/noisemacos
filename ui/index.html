@@ -93,6 +93,7 @@
       <div>
         <button id="recorderButton">Start recording to file</button>
         <button onclick="savePreset()">Save default preset</button>
+        <button onclick="reset()">Reset</button>
       </div>
     </div>
     <style>
@@ -190,7 +191,7 @@
         //Create a biquad filter
         frequencyBands[i] = new BiquadFilterNode(audioCtx, {
           type: "peaking",
-          Q: 50,
+          Q: 3.5,
           frequency:
             (frequencyBandValues[i + 1] - frequencyBandValues[i]) / 2 +
             frequencyBandValues[i],
@@ -206,8 +207,8 @@
         currentEq.setAttribute("name", "eqGain" + i);
         currentEq.setAttribute("id", "eqGain" + i);
         currentEq.setAttribute("type", "range");
-        currentEq.setAttribute("min", "-200");
-        currentEq.setAttribute("max", "200");
+        currentEq.setAttribute("min", "-100");
+        currentEq.setAttribute("max", "100");
         currentEq.setAttribute("value", "0");
         currentEq.setAttribute("step", "1");
         currentWrap.appendChild(currentEq);
@@ -345,7 +346,9 @@
       }
 
       const sliders = document.querySelectorAll(".eqSliderWrap input");
-      var defaultPreset = new Preset(frequencyBands, sliders);
+      var defaultPreset = new Preset(null, sliders);
+      defaultPreset.createFromData({ frequencyBandGains: [0,0,0,0,0,0,0,0,0] })
+      console.log(defaultPreset);
 
       function savePreset() {
         userPreset = new Preset(frequencyBands, sliders);
@@ -364,6 +367,11 @@
       }
 
       loadPreset();
+
+      function reset() {
+        defaultPreset.apply(frequencyBands, audioCtx);
+        displayMessage("Reset completed", true)
+      }
     </script>
     <script>
       //This script tag is for the recorder
